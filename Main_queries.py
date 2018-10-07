@@ -13,7 +13,7 @@ from Scorer import ScoreQuery, GetWordsIDF
 # Формат: номер\tтекст запроса\tпереформулировки
 QUERIES_FILENAME = 'queries.numerate_review.txt'
 SAMPLE_SUBMISSION_FILENAME = 'sample.submission.txt'
-OUTPUT_NAME = 'submissions/out.submission.txt'+STEMMER+'-1'
+OUTPUT_NAME = 'submissions/out.submission.txt'+STEMMER+'-2'
 
 def RemoveEmptyWords(words_list):
     result = []
