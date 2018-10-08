@@ -29,7 +29,7 @@ def GetWordsIDF(words, corpus_len, corpus_info):
     for w in words:
         if corpus_info[w].count_in_corpus != 0:
             #result.append(-np.log(1 - np.exp(-CONSTANT_IDF * corpus_info[w].count_in_corpus / N_URLS)))
-            result.append(-np.log(corpus_info[w].count_documents / N_URLS))
+            result.append(-np.log(corpus_info[w].count_in_corpus / corpus_len))
         else:
             print("No word: "+w)
             result.append(0.0)

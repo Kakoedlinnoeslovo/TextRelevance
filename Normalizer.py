@@ -7,7 +7,7 @@ import re
 
 import Stemmer
 
-STEMMER = 'pystem' #pystem, yandex, nostem
+STEMMER = 'yandex' #pystem, yandex, nostem
 
 EXTRACT_DIGITS = re.compile("(\d+)")
 NOT_DIGIT_OR_LETTER = re.compile("\W+")
