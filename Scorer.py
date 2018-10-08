@@ -6,6 +6,8 @@ from collections import defaultdict
 from Main_files import MODE, DOCUMENTSDIR_SUFFIX, TF_DIR, N_URLS
 from Normalizer import STEMMER
 
+CONSTANT_IDF = 1.5
+
 COEFFICIENT_BASE_WORDS = 1.0
 COEFFICIENT_SYNONIMS_WORDS = 0.7
 K1 = 1.0
@@ -26,9 +28,23 @@ def GetWordsIDF(words, corpus_len, corpus_info):
     result = []
     for w in words:
         if corpus_info[w].count_in_corpus != 0:
-            result.append(-np.log(1 - np.exp(-1.5 * corpus_info[w].count_in_corpus / N_URLS)))
+            #result.append(-np.log(1 - np.exp(-CONSTANT_IDF * corpus_info[w].count_in_corpus / N_URLS)))
+            result.append(-np.log(corpus_info[w].count_documents / N_URLS))
         else:
             print("No word: "+w)
+            result.append(0.0)
+    return result
+
+def GetQueryDocumensWordsIDF(words, documents_info):
+    result = []
+    for w in words:
+        word_count = 0
+        for document_dict in documents_info:
+            if len(document_dict[w]) != 0:
+                word_count += 1
+        if word_count != 0:
+            result.append(-np.log(word_count / len(documents_info)))
+        else:
             result.append(0.0)
     return result
 
@@ -97,26 +113,32 @@ def ScoreQuery(query_info, corpus_len, corpus_info, median_idf):
     #global K2
     #K2 = float(N_URLS) / corpus_len
     #print(K2)
-
+    documents_data = [ParseTFDocument(doc_id) for doc_id in query_info.doc_indices]
+    documents_info = [documents_data[i][0] for i in range(len(documents_data))]
     base_words_idf = GetWordsIDF(query_info.words_base, corpus_len, corpus_info)
     extend_words_idf = GetWordsIDF(query_info.words_extend, corpus_len, corpus_info)
+#    base_words_idf = GetQueryDocumensWordsIDF(query_info.words_base, documents_info)
+#    extend_words_idf = GetQueryDocumensWordsIDF(query_info.words_extend, documents_info)
+    #print(base_words_idf, extend_words_idf)
 
     results = []
-    for doc_id in query_info.doc_indices:
-        document_dict, document_len = ParseTFDocument(doc_id)
+    for doc_index in range(len(query_info.doc_indices)):
         results.append(COEFFICIENT_BASE_WORDS * ScoreWords(query_info.words_base, base_words_idf,
-                                                           document_dict, document_len) + \
+                                                           *documents_data[doc_index]) + \
                        COEFFICIENT_SYNONIMS_WORDS * ScoreWords(query_info.words_extend, extend_words_idf,
-                                                               document_dict, document_len) + \
-                       COEFFICIENT_PAIRS * ScoreQueryPairs(query_info.words_base, base_words_idf, document_dict) + \
-                       COEFFICIENT_PAIRS * ScoreQueryPairs(query_info.words_extend, extend_words_idf, document_dict) + \
+                                                               *documents_data[doc_index]) + \
+                       COEFFICIENT_BASE_WORDS * COEFFICIENT_PAIRS * \
+                                    ScoreQueryPairs(query_info.words_base, base_words_idf, documents_info[doc_index]) + \
+                       COEFFICIENT_SYNONIMS_WORDS * COEFFICIENT_PAIRS * \
+                                    ScoreQueryPairs(query_info.words_extend, extend_words_idf, documents_info[doc_index]) + \
                        COEFFICIENT_INCLUDE_ALL_WORDS * ScoreIncludeAllWords(query_info.words_base, base_words_idf,
-                                                                            document_dict, median_idf))
+                                                                            documents_info[doc_index], median_idf))
 #        print(doc_id, COEFFICIENT_BASE_WORDS * ScoreWords(query_info.words_base, base_words_idf,
 #                                                           document_dict, document_len),
 #                       COEFFICIENT_SYNONIMS_WORDS * ScoreWords(query_info.words_extend, extend_words_idf,
 #                                                               document_dict, document_len),
-#                       COEFFICIENT_PAIRS * ScoreQueryPairs(query_info.words_base, base_words_idf, document_dict),
+#                       COEFFICIENT_BASE_WORDS * COEFFICIENT_PAIRS * \
+#                                    ScoreQueryPairs(query_info.words_base, base_words_idf, document_dict),
 #                       COEFFICIENT_SYNONIMS_WORDS * COEFFICIENT_PAIRS * \
 #                                    ScoreQueryPairs(query_info.words_extend, extend_words_idf, document_dict),
 #                       COEFFICIENT_INCLUDE_ALL_WORDS * ScoreIncludeAllWords(query_info.words_base, base_words_idf,

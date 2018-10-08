@@ -13,7 +13,7 @@ from Scorer import ScoreQuery, GetWordsIDF
 # Формат: номер\tтекст запроса\tпереформулировки
 QUERIES_FILENAME = 'queries.numerate_review.txt'
 SAMPLE_SUBMISSION_FILENAME = 'sample.submission.txt'
-OUTPUT_NAME = 'submissions/out.submission.txt'+STEMMER+'-2'
+OUTPUT_NAME = 'submissions/out.submission.txt'+STEMMER+'-5-idf_all'
 
 def RemoveEmptyWords(words_list):
     result = []
@@ -94,10 +94,13 @@ if __name__ == '__main__':
     out_file = open(OUTPUT_NAME, 'w')
     out_file.write("QueryId,DocumentId\n")
     for query_id, query_info in queries_dict.items():
+#        if query_id != 43:
+#            continue
         scores = -np.array(ScoreQuery(query_info, corpus_len, corpus_info, median_idf))
         print(query_id, scores[:5])
         argsort = np.argsort(scores)
         for doc_pos in argsort:
             out_file.write(str(query_id)+","+str(query_info.doc_indices[doc_pos])+"\n")
         out_file.flush()
+        #break
     out_file.close()
