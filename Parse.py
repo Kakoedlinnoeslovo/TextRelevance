@@ -1,14 +1,18 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*2
 
 import re
 import os
 from inscriptis import get_text
+from bs4 import BeautifulSoup
 
 from Normalizer import Steming, FirstReplaces, SecondaryReplaces
 
 # Строка, временно разделяющая в файле 1го парсинга заголовок и основной текст
 TITLE_SPLITER = 'TITLETITLETTTTIIIIITTTLLLEE'
 EXTRACT_TITLE = re.compile('<title>(.*?)<\/title>', re.DOTALL)
+
+EXTRACTOR = 'bs' # inscriptis или bs (beautiful soup)
+BS_COMMENT = re.compile('<!---.*--->', re.DOTALL)
 
 # Принимает на вход текст, возвращает слова из него
 def ExtractText(text):
@@ -21,6 +25,29 @@ def ExtractText(text):
         if w != '':
             result_words.append(w)
     return result_words
+
+def InscriptisDecoder(text):
+    return get_text(text)
+
+def BSDecoder(text):
+    soup = BeautifulSoup(text)
+    data = soup.findAll(text=True)
+
+    def visible(element):
+        if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
+            return False
+        elif re.match(BS_COMMENT, str(element.encode('utf-8'))):
+            return False
+        return True
+
+    result = filter(visible, data)
+    return " ".join(result)
+
+def DecodeHTML(text):
+    if EXTRACTOR == 'inscriptis':
+        return InscriptisDecoder(text)
+    if EXTRACTOR == 'bs':
+        return BSDecoder(text)
 
 def ParseFile(text, out_name, skip_exist=True):
     if os.path.exists(out_name) and skip_exist:

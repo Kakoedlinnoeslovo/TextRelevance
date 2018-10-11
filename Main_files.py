@@ -2,11 +2,11 @@
 
 import numpy as np
 from multiprocessing import Pool
-from Parse import CleanFiles
+from Parse import CleanFiles, EXTRACTOR
 from TF_IDF import GetFilesStatistics, MakeCorpusStatistics
 from Normalizer import STEMMER
 
-N_WORKERS = 16
+N_WORKERS = 8
 SKIP_EXIST = True
 
 DATADIR = "data/"
@@ -14,7 +14,7 @@ URLS_FILE = "urls.numerate.txt"
 FILELIST_PREFIX = "filelist_"
 
 N_URLS = 38114
-DATA_INDICES_STR = [str(i) for i in range(N_URLS+1)]
+DATA_INDICES_STR = [str(i) for i in range(1, N_URLS+1)]
 TEST_INDICES_STR = ['15909', '1744', '17608', '32198', '5715']
 
 DOCUMENTSDIR_SUFFIX = '_work/'
@@ -48,7 +48,8 @@ def Parse(skip_exist=True):
     file_vs_names.close()
     filenames_splits = GetFilestringsSplit(filenames)
     StartInPool(CleanFiles, [(urls, MODE+DOCUMENTSDIR_SUFFIX+CONTENT_DIR, \
-                              MODE+DOCUMENTSDIR_SUFFIX+PARSED_DIR+STEMMER, filenames_splits[i], SKIP_EXIST) \
+                              MODE+DOCUMENTSDIR_SUFFIX+PARSED_DIR+EXTRACTOR+"_"+STEMMER, filenames_splits[i],
+                              SKIP_EXIST) \
                              for i in range(N_WORKERS)])
 
 def TF(skip_exist=True):
@@ -56,8 +57,9 @@ def TF(skip_exist=True):
         filenames_splits = GetFilestringsSplit(DATA_INDICES_STR)
     if MODE == 'test':
         filenames_splits = GetFilestringsSplit(TEST_INDICES_STR)
-    StartInPool(GetFilesStatistics, [(MODE+DOCUMENTSDIR_SUFFIX+PARSED_DIR+STEMMER, \
-                                      MODE+DOCUMENTSDIR_SUFFIX+TF_DIR+STEMMER, filenames_splits[i], SKIP_EXIST) \
+    StartInPool(GetFilesStatistics, [(MODE+DOCUMENTSDIR_SUFFIX+PARSED_DIR+EXTRACTOR+"_"+STEMMER, \
+                                      MODE+DOCUMENTSDIR_SUFFIX+TF_DIR+EXTRACTOR+"_"+STEMMER, filenames_splits[i],
+                                      SKIP_EXIST) \
                                      for i in range(N_WORKERS)])
 
 def ProcessFiles():
@@ -65,8 +67,9 @@ def ProcessFiles():
     TF()
 
     indices = DATA_INDICES_STR if MODE == 'data' else TEST_INDICES_STR
-    MakeCorpusStatistics(MODE+DOCUMENTSDIR_SUFFIX+TF_DIR+STEMMER,
-                         MODE+DOCUMENTSDIR_SUFFIX+CORPUS_STAT_FILENAME_PREFIX+STEMMER+CORPUS_STAT_FILENAME_EXT,
+    MakeCorpusStatistics(MODE+DOCUMENTSDIR_SUFFIX+TF_DIR+EXTRACTOR+"_"+STEMMER,
+                         MODE+DOCUMENTSDIR_SUFFIX+CORPUS_STAT_FILENAME_PREFIX+EXTRACTOR+"_"+STEMMER+
+                         CORPUS_STAT_FILENAME_EXT,
                          indices)
 
 if __name__ == '__main__':

@@ -3,6 +3,8 @@ print(",".join(str(pos) for pos in [1, 2, 3]))
 from collections import defaultdict
 from inscriptis import get_text
 
+from Parse import BSDecoder
+
 d = defaultdict(list)
 print(d['te'])
 
@@ -20,7 +22,7 @@ html = '''
        rrrrr
        '''
 
-print(get_text(html))
+print(" ".join(BSDecoder(html)))
 
 
 #from inscriptis import get_text

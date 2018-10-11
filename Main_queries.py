@@ -4,6 +4,7 @@ import numpy as np
 from collections import defaultdict
 import os
 
+from Parse import EXTRACTOR
 from TF_IDF import LemmInfo
 from Main_files import DATADIR, DOCUMENTSDIR_SUFFIX, MODE, \
                        CORPUS_STAT_FILENAME_PREFIX, CORPUS_STAT_FILENAME_EXT
@@ -13,7 +14,7 @@ from Scorer import ScoreQuery, GetWordsIDF
 # Формат: номер\tтекст запроса\tпереформулировки
 QUERIES_FILENAME = 'queries.numerate_review.txt'
 SAMPLE_SUBMISSION_FILENAME = 'sample.submission.txt'
-OUTPUT_NAME = 'submissions/out.submission.txt'+STEMMER+'-6'
+OUTPUT_NAME = 'submissions/out.submission.txt'+EXTRACTOR+"_"+STEMMER+'-10'
 
 def RemoveEmptyWords(words_list):
     result = []
@@ -29,8 +30,8 @@ def SplitWords(text):
 # Возвращает corpus_dict (слово - LemmInfo), общая длина корпуса
 def LoadCorpusInfo():
     corpus_dict = defaultdict(LemmInfo)
-    corpus_file = open(MODE+DOCUMENTSDIR_SUFFIX+CORPUS_STAT_FILENAME_PREFIX+STEMMER+CORPUS_STAT_FILENAME_EXT,
-                       'r', encoding='utf-8')
+    corpus_file = open(MODE+DOCUMENTSDIR_SUFFIX+CORPUS_STAT_FILENAME_PREFIX+EXTRACTOR+"_"+STEMMER+ \
+                       CORPUS_STAT_FILENAME_EXT, 'r', encoding='utf-8')
     corpus_lines = corpus_file.read().splitlines()
     for line in corpus_lines[:-1]:
         line = line.split('\t')

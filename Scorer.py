@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from Main_files import MODE, DOCUMENTSDIR_SUFFIX, TF_DIR, N_URLS
 from Normalizer import STEMMER
+from Parse import  EXTRACTOR
 
 CONSTANT_IDF = 1.5
 
@@ -51,7 +52,7 @@ def GetQueryDocumensWordsIDF(words, documents_info):
 # Возвращает словарь(слово - список вхождений), размер документа
 def ParseTFDocument(url_id):
     document_dict = defaultdict(list)
-    doc_file = open(MODE+DOCUMENTSDIR_SUFFIX+TF_DIR+STEMMER+"/"+str(url_id), 'r', encoding='utf-8')
+    doc_file = open(MODE+DOCUMENTSDIR_SUFFIX+TF_DIR+EXTRACTOR+"_"+STEMMER+"/"+str(url_id), 'r', encoding='utf-8')
     doc_lines = doc_file.read().splitlines()
     for line in doc_lines[:-1]:
         line_parts = line.split('\t')
